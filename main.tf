@@ -34,13 +34,15 @@ resource "google_project_service" "required_apis" {
     "iamcredentials.googleapis.com",
     "storage.googleapis.com",
     "compute.googleapis.com",
+    "vpcaccess.googleapis.com",     
+    "iam.googleapis.com",           
+    "cloudkms.googleapis.com",      
+    "artifactregistry.googleapis.com"
   ])
-  project = "272907652960"
-  service = each.key
-
+  project            = var.project_id 
+  service            = each.key
   disable_on_destroy = false
 }
-
 ########################################################################################################################################################################
 ## Setting up the Cloud Run
 ########################################################################################################################################################################
@@ -61,6 +63,7 @@ resource "google_vpc_access_connector" "connector" {
   region        = var.region
   ip_cidr_range = "10.8.0.0/28"
   network       = google_compute_network.vpc_network.name
+  depends_on = [google_project_service.required_apis] 
 }
 
 resource "google_kms_key_ring" "keyring" {
