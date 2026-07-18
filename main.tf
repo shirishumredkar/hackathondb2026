@@ -39,15 +39,6 @@ resource "google_project_service" "required_apis" {
 }
 
 ########################################################################################################################################################################
-## Provisioning IAM Access
-########################################################################################################################################################################
-resource "google_project_iam_member" "pipeline_kms_admin" {
-  project = var.project_id
-  role    = "roles/cloudkms.admin"
-  member  = "serviceAccount:tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
-}
-
-########################################################################################################################################################################
 ## Setting up the Cloud Run Infrastructure
 ########################################################################################################################################################################
 resource "google_compute_network" "vpc_network" {
@@ -99,13 +90,17 @@ resource "google_service_account" "cloudrun_sa" {
 
 data "google_project" "gcp_sa" {}
 
-resource "google_kms_crypto_key_iam_binding" "kms_binding" {
+# FIXED: Replaced standard broad bindings with safe, non-privileged individual target assignments
+resource "google_kms_crypto_key_iam_member" "compute_kms" {
   crypto_key_id = google_kms_crypto_key.cloudrun_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-    "serviceAccount:service-${data.google_project.gcp_sa.number}@compute-system.iam.gserviceaccount.com",
-    "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
-  ]
+  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@compute-system.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "registry_kms" {
+  crypto_key_id = google_kms_crypto_key.cloudrun_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
 }
 
 resource "google_artifact_registry_repository" "app_repo" {
@@ -118,14 +113,13 @@ resource "google_artifact_registry_repository" "app_repo" {
   
   depends_on    = [
     google_project_service.required_apis,
-    google_kms_crypto_key_iam_binding.kms_binding
+    google_kms_crypto_key_iam_member.registry_kms
   ]
 }
 
 ########################################################################################################################################################################
-## Temporary Imports (Remove these after one successful deployment)
+## Temporary Imports
 ########################################################################################################################################################################
-
 import {
   to = google_compute_network.vpc_network
   id = "projects/project-495bdca4-ac50-4df5-bb6/global/networks/cloudrun-vpc"
@@ -155,4 +149,3 @@ import {
   to = google_kms_crypto_key.cloudrun_key
   id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring/cryptoKeys/cloudrun-customer-key"
 }
-
