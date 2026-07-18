@@ -39,6 +39,15 @@ resource "google_project_service" "required_apis" {
 }
 
 ########################################################################################################################################################################
+## Service account Access
+########################################################################################################################################################################
+resource "google_project_iam_member" "pipeline_kms_admin" {
+  project = var.project_id
+  role    = "roles/cloudkms.admin"
+  member  = "serviceAccount:tf-github-actions@://gserviceaccount.com"
+}
+
+########################################################################################################################################################################
 ## Setting up the Cloud Run Infrastructure
 ########################################################################################################################################################################
 resource "google_compute_network" "vpc_network" {
@@ -117,35 +126,4 @@ resource "google_artifact_registry_repository" "app_repo" {
   ]
 }
 
-########################################################################################################################################################################
-## Temporary Imports
-########################################################################################################################################################################
-import {
-  to = google_compute_network.vpc_network
-  id = "projects/project-495bdca4-ac50-4df5-bb6/global/networks/cloudrun-vpc"
-}
 
-import {
-  to = google_kms_key_ring.keyring
-  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring"
-}
-
-import {
-  to = google_service_account.cloudrun_sa
-  id = "projects/project-495bdca4-ac50-4df5-bb6/serviceAccounts/cloud-run-runtime-sa@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
-}
-
-import {
-  to = google_compute_subnetwork.subnet
-  id = "projects/project-495bdca4-ac50-4df5-bb6/regions/us-central1/subnetworks/cloudrun-subnet"
-}
-
-import {
-  to = google_vpc_access_connector.connector
-  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/connectors/cr-vpc-connector"
-}
-
-import {
-  to = google_kms_crypto_key.cloudrun_key
-  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring/cryptoKeys/cloudrun-customer-key"
-}
