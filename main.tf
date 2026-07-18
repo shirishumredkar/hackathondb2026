@@ -139,10 +139,11 @@ import {
 
 import {
   to = google_vpc_access_connector.connector
-  id = "projects/project-495bdca4-ac50-4df5-bb6/regions/us-central1/vpcConnectors/cr-vpc-connector"
+  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/connectors/cr-vpc-connector"
 }
 
 import {
   to = google_kms_crypto_key.cloudrun_key
   id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring/cryptoKeys/cloudrun-customer-key"
 }
+
