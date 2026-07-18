@@ -23,35 +23,33 @@ provider "google" {
 ########################################################################################################################################################################
 ## Enabling the API Services
 ########################################################################################################################################################################
-resource "google_project_service" "iamcredentials" {
-  project = "272907652960"  
-  service = "iamcredentials.googleapis.com"
-  disable_on_destroy = false
-}
-
 resource "google_project_service" "required_apis" {
   for_each = toset([
     "iamcredentials.googleapis.com",
     "storage.googleapis.com",
     "compute.googleapis.com",
-    "vpcaccess.googleapis.com",     
-    "iam.googleapis.com",           
-    "cloudkms.googleapis.com",      
+    "vpcaccess.googleapis.com",
+    "iam.googleapis.com",
+    "cloudkms.googleapis.com",
     "artifactregistry.googleapis.com"
   ])
-  project            = var.project_id 
+  project            = var.project_id
   service            = each.key
   disable_on_destroy = false
 }
+
 ########################################################################################################################################################################
-## Setting up the Cloud Run
+## Setting up the Cloud Run Infrastructure
 ########################################################################################################################################################################
 resource "google_compute_network" "vpc_network" {
+  project                 = var.project_id
   name                    = "cloudrun-vpc"
   auto_create_subnetworks = false
+  depends_on              = [google_project_service.required_apis]
 }
 
 resource "google_compute_subnetwork" "subnet" {
+  project       = var.project_id
   name          = "cloudrun-subnet"
   ip_cidr_range = "10.0.0.0/24"
   region        = var.region
@@ -59,16 +57,19 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_vpc_access_connector" "connector" {
+  project       = var.project_id
   name          = "cr-vpc-connector"
   region        = var.region
   ip_cidr_range = "10.8.0.0/28"
   network       = google_compute_network.vpc_network.name
-  depends_on = [google_project_service.required_apis] 
+  depends_on    = [google_project_service.required_apis]
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name     = "cloudrun-keyring"
-  location = var.region
+  project    = var.project_id
+  name       = "cloudrun-keyring"
+  location   = var.region
+  depends_on = [google_project_service.required_apis]
 }
 
 resource "google_kms_crypto_key" "cloudrun_key" {
@@ -81,16 +82,20 @@ resource "google_kms_crypto_key" "cloudrun_key" {
 }
 
 resource "google_service_account" "cloudrun_sa" {
+  project      = var.project_id
   account_id   = "cloud-run-runtime-sa"
   display_name = "Service Account for Cloud Run Execution"
+  depends_on   = [google_project_service.required_apis]
 }
 
 resource "google_artifact_registry_repository" "app_repo" {
+  project       = var.project_id
   location      = var.region
   repository_id = "app-docker-images"
   description   = "Docker repository for Cloud Run images"
   format        = "DOCKER"
   kms_key_name  = google_kms_crypto_key.cloudrun_key.id
+  depends_on    = [google_project_service.required_apis]
 }
 
 data "google_project" "gcp_sa" {}
