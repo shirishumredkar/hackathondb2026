@@ -101,13 +101,13 @@ resource "google_kms_crypto_key_iam_member" "compute_kms" {
 resource "google_kms_crypto_key_iam_member" "registry_kms" {
   crypto_key_id = google_kms_crypto_key.cloudrun_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
+  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "registry_kms_servless" {
   crypto_key_id = google_kms_crypto_key.cloudrun_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@serverless-robot-prod.iam.gserviceaccount.com",
+  member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@serverless-robot-prod.iam.gserviceaccount.com"
 }
 
 resource "google_artifact_registry_repository" "app_repo" {
