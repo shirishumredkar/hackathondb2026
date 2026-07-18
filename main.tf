@@ -42,11 +42,11 @@ resource "google_project_service" "required_apis" {
 ########################################################################################################################################################################
 ## Providing TF service account Accessa
 ########################################################################################################################################################################
-resource "google_project_iam_member" "pipeline_run_admin" {
-  project = var.project_id
-  role    = "roles/run.admin"
-  member  = "serviceAccount:tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
-}
+##resource "google_project_iam_member" "pipeline_run_admin" {
+##  project = var.project_id
+##  role    = "roles/run.admin"
+##  member  = "serviceAccount:tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
+##}
 
 ########################################################################################################################################################################
 ## Setting up the Cloud Run Infrastructure
