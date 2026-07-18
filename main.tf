@@ -44,7 +44,7 @@ resource "google_project_service" "required_apis" {
 resource "google_project_iam_member" "pipeline_kms_admin" {
   project = var.project_id
   role    = "roles/cloudkms.admin"
-  member  = "serviceAccount:tf-github-actions@://gserviceaccount.com"
+  member  = "serviceAccount:tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
 }
 
 ########################################################################################################################################################################
