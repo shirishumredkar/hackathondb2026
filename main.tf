@@ -25,13 +25,13 @@ provider "google" {
 ########################################################################################################################################################################
 resource "google_project_service" "required_apis" {
   for_each = toset([
-    "://googleapis.com",
-    "://googleapis.com",
-    "://googleapis.com",
-    "://googleapis.com",
-    "://googleapis.com",
-    "://googleapis.com",
-    "://googleapis.com"
+    "iamcredentials.googleapis.com",
+    "storage.googleapis.com",
+    "compute.googleapis.com",
+    "vpcaccess.googleapis.com",
+    "iam.googleapis.com",
+    "cloudkms.googleapis.com",
+    "artifactregistry.googleapis.com"
   ])
   project            = var.project_id
   service            = each.key
