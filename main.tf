@@ -31,7 +31,8 @@ resource "google_project_service" "required_apis" {
     "vpcaccess.googleapis.com",
     "iam.googleapis.com",
     "cloudkms.googleapis.com",
-    "artifactregistry.googleapis.com"
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com"
   ])
   project            = var.project_id
   service            = each.key
