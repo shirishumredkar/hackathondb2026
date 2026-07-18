@@ -25,13 +25,13 @@ provider "google" {
 ########################################################################################################################################################################
 resource "google_project_service" "required_apis" {
   for_each = toset([
-    "iamcredentials.googleapis.com",
-    "storage.googleapis.com",
-    "compute.googleapis.com",
-    "vpcaccess.googleapis.com",
-    "iam.googleapis.com",
-    "cloudkms.googleapis.com",
-    "artifactregistry.googleapis.com"
+    "://googleapis.com",
+    "://googleapis.com",
+    "://googleapis.com",
+    "://googleapis.com",
+    "://googleapis.com",
+    "://googleapis.com",
+    "://googleapis.com"
   ])
   project            = var.project_id
   service            = each.key
@@ -88,6 +88,17 @@ resource "google_service_account" "cloudrun_sa" {
   depends_on   = [google_project_service.required_apis]
 }
 
+data "google_project" "gcp_sa" {}
+
+resource "google_kms_crypto_key_iam_binding" "kms_binding" {
+  crypto_key_id = google_kms_crypto_key.cloudrun_key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  members = [
+    "serviceAccount:service-${data.google_project.gcp_sa.number}@compute-system.iam.gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+  ]
+}
+
 resource "google_artifact_registry_repository" "app_repo" {
   project       = var.project_id
   location      = var.region
@@ -95,16 +106,9 @@ resource "google_artifact_registry_repository" "app_repo" {
   description   = "Docker repository for Cloud Run images"
   format        = "DOCKER"
   kms_key_name  = google_kms_crypto_key.cloudrun_key.id
-  depends_on    = [google_project_service.required_apis]
-}
-
-data "google_project" "gcp_sa" {}
-
-resource "google_kms_crypto_key_iam_binding" "kms_binding" {
-  crypto_key_id = google_kms_crypto_key.cloudrun_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  members = [
-    "serviceAccount:service-${data.google_project.gcp_sa.number}@://gserviceaccount.com",
-    "serviceAccount:service-${data.google_project.gcp_sa.number}@://gserviceaccount.com"
+  
+  depends_on    = [
+    google_project_service.required_apis,
+    google_kms_crypto_key_iam_binding.kms_binding
   ]
 }
