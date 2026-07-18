@@ -133,4 +133,21 @@ resource "google_artifact_registry_repository" "app_repo" {
   ]
 }
 
+########################################################################################################################################################################
+## Creating Secret for CLoud RUn cnfig
+########################################################################################################################################################################
+# 1. Create a single secret for the entire .env profile
+resource "google_secret_manager_secret" "app_env" {
+  secret_id = "app-env-config"
+  replication {
+    auto {}
+  }
+}
+
+# 2. Grant Access Permissions to Cloud Run SA for this single secret
+resource "google_secret_manager_secret_iam_member" "run_secret_access" {
+  secret_id = google_secret_manager_secret.app_env.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:cloud-run-runtime-sa@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
+}
 
