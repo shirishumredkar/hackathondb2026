@@ -132,3 +132,17 @@ import {
   id = "projects/project-495bdca4-ac50-4df5-bb6/serviceAccounts/cloud-run-runtime-sa@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
 }
 
+import {
+  to = google_compute_subnetwork.subnet
+  id = "projects/project-495bdca4-ac50-4df5-bb6/regions/us-central1/subnetworks/cloudrun-subnet"
+}
+
+import {
+  to = google_vpc_access_connector.connector
+  id = "projects/project-495bdca4-ac50-4df5-bb6/regions/us-central1/vpcConnectors/cr-vpc-connector"
+}
+
+import {
+  to = google_kms_crypto_key.cloudrun_key
+  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring/cryptoKeys/cloudrun-customer-key"
+}
