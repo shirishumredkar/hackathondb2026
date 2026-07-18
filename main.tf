@@ -102,6 +102,13 @@ resource "google_kms_crypto_key_iam_member" "registry_kms" {
   crypto_key_id = google_kms_crypto_key.cloudrun_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:service-${data.google_project.gcp_sa.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+  members = [
+    # Artifact Registry Identity Agent
+    "serviceAccount:service-${data.google_project.gcp_sa.number}}@gcp-sa-artifactregistry.iam.gserviceaccount.com",
+    
+    # Cloud Run Service Agent Identity
+    "serviceAccount:service-${data.google_project.gcp_sa.number}@serverless-robot-prod.iam.gserviceaccount.com"
+  ]
 }
 
 resource "google_artifact_registry_repository" "app_repo" {
