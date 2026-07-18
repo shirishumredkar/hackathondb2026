@@ -90,13 +90,13 @@ resource "google_artifact_registry_repository" "app_repo" {
   kms_key_name  = google_kms_crypto_key.cloudrun_key.id
 }
 
-data "google_project_of_identity" "gcp_sa" {}
+data "google_project" "gcp_sa" {}
 
 resource "google_kms_crypto_key_iam_binding" "kms_binding" {
   crypto_key_id = google_kms_crypto_key.cloudrun_key.id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   members = [
-    "serviceAccount:service-${data.google_project_of_identity.gcp_sa.project_number}@://gserviceaccount.com",
-    "serviceAccount:service-${data.google_project_of_identity.gcp_sa.project_number}@://gserviceaccount.com"
+    "serviceAccount:service-${data.google_project.gcp_sa.number}@://gserviceaccount.com",
+    "serviceAccount:service-${data.google_project.gcp_sa.number}@://gserviceaccount.com"
   ]
 }
