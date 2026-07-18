@@ -112,3 +112,23 @@ resource "google_artifact_registry_repository" "app_repo" {
     google_kms_crypto_key_iam_binding.kms_binding
   ]
 }
+
+########################################################################################################################################################################
+## Temporary Imports (Remove these after one successful deployment)
+########################################################################################################################################################################
+
+import {
+  to = google_compute_network.vpc_network
+  id = "projects/project-495bdca4-ac50-4df5-bb6/global/networks/cloudrun-vpc"
+}
+
+import {
+  to = google_kms_key_ring.keyring
+  id = "projects/project-495bdca4-ac50-4df5-bb6/locations/us-central1/keyRings/cloudrun-keyring"
+}
+
+import {
+  to = google_service_account.cloudrun_sa
+  id = "projects/project-495bdca4-ac50-4df5-bb6/serviceAccounts/cloud-run-runtime-sa@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
+}
+
