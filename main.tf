@@ -150,5 +150,6 @@ resource "google_secret_manager_secret_iam_member" "run_secret_access" {
   secret_id = google_secret_manager_secret.app_env.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:cloud-run-runtime-sa@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com"
+  depends_on = [google_secret_manager_secret.app_env]
 }
 
