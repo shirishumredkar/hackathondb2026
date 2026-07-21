@@ -1,0 +1,78 @@
+	• Login to GCP Console
+           Sign in to continue to Google Cloud Platform
+           hackathondb2026@gmail.com
+
+	• Google Cloud SDK Setup
+	
+		○ Download Google cloud SDK installer & copy to D:\Hackathon\2026\Softwares
+		○ Click on Installer & install it to location D:\Hackathon\2026\Installations\cloudsdk
+		○ Set the environment variable in PATH D:\Hackathon\2026\Installations\cloudsdk\google-cloud-sdk\bin
+
+	• Terraform Setup
+	
+		○ Go to the  website: Install | Terraform | HashiCorp Developer& download amd64 software to D:\Hackathon\2026\Installations\Terraform
+		○ Unzip the file to location D:\Hackathon\2026\Installations\terraform
+		○ Set the environment variable in PATH D:\Hackathon\2026\Installations\Terraform
+		○ terraform -v
+
+	• GITHUB Login
+		
+		○ Go to the  website GitHub
+		shirish.umredkar@gmail.com
+
+	
+	• Setup Terraform GITHUB & GCP Project Connectivity via WIF
+         
+		○ gcloud init
+		hackathon-db-2026
+		○ gcloud config list
+		○ gcloud config set project project-495bdca4-ac50-4df5-bb6
+		○ gcloud iam service-accounts create tf-github-actions --display-name="Terraform GitHub Actions Service Account"
+		D:\Hackathon\2026\Installations\cloudsdk\google-cloud-sdk\bin>gcloud iam service-accounts create tf-github-actions --display-name="Terraform GitHub Actions Service Account"
+		Created service account [tf-github-actions].
+		Service account email: tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com
+		○ gcloud iam workload-identity-pools create github-pool --location="global" --display-name="GitHub Pool"
+		○ gcloud iam workload-identity-pools providers create-oidc github-provider --workload-identity-pool="github-pool" --location="global" --issuer-uri="https://githubusercontent.com"  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" --attribute-condition="assertion.repository_owner=='shirishumredkar'"
+		○ gcloud iam workload-identity-pools describe github-pool --location="global" --format="value(name)"
+	           projects/272907652960/locations/global/workloadIdentityPools/github-pool
+		○ gcloud projects add-iam-policy-binding project-495bdca4-ac50-4df5-bb6 --member="serviceAccount:tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com" --role="roles/editor"
+		○ gcloud alpha iam policies lint-condition
+		○ gcloud iam service-accounts add-iam-policy-binding tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com --role="roles/iam.workloadIdentityUser" --member="principalSet://iam.googleapis.com/projects/272907652960/locations/global/workloadIdentityPools/github-pool/attribute.repository/shirishumredkar/hackathondb2026"
+	
+		○ gcloud storage buckets create gs://hackathondb2026-terraform-state-bucket --location=US
+		○ gcloud iam workload-identity-pools providers update-oidc github-provider --workload-identity-pool="github-pool" --location="global" --display-name="GitHub Provider" --issuer-uri="https://token.actions.githubusercontent.com" --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" --attribute-condition="assertion.repository=='shirishumredkar/hackathondb2026'"
+	
+	  -- First time setup
+		○ gcloud services enable iamcredentials.googleapis.com --project=272907652960
+		○ gcloud services enable cloudresourcemanager.googleapis.com iamcredentials.googleapis.com storage.googleapis.com compute.googleapis.com --project=272907652960
+	
+	• Creating APP Repository & linking to GITHUB & Terraform & Deploying
+
+		○ Create new repo shirishumredkar/hackathondbcd
+		○ gcloud storage buckets create gs://hackathondb2026-cloudrun-app-tfstate-bucket --location=us-central1
+		○ gcloud iam service-accounts add-iam-policy-binding tf-github-actions@project-495bdca4-ac50-4df5-bb6.iam.gserviceaccount.com --role="roles/iam.workloadIdentityUser" --member="principalSet://iam.googleapis.com/projects/272907652960/locations/global/workloadIdentityPools/github-pool/attribute.repository/shirishumredkar/hackathondbcd"
+		○ gcloud iam workload-identity-pools providers update-oidc github-provider --workload-identity-pool="github-pool" --location="global" --display-name="GitHub Provider" --issuer-uri="https://token.actions.githubusercontent.com" --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" --attribute-condition="assertion.repository == 'shirishumredkar/hackathondb2026' || assertion.repository == 'shirishumredkar/hackathondbcd'"
+          
+	
+		○ Set these Permission Manually
+		   Cloud KMS Admin
+		   Cloud Run Admin
+		   Editor
+		   Secret Manager Admin      
+			
+
+
+	• Identifying Service
+
+		○ gcloud run services describe cloudrun-app-server --region=us-central1 --format="value(status.url)"
+	
+	• Creating the Secret 
+
+		○ Create secret in repo hackathondb2026
+		○ Upload .env file into Secret
+		○ gcloud secrets manager versions add app-env-config --data-file=D:\Hackathon\ui\.env
+	
+	• Mount the Secret 
+
+		○ Mount the secret in code deployment service repo hackathondbcd
+          gcloud secrets manager versions add app-env-config --data-file=D:\Hackathon\ui\.env
